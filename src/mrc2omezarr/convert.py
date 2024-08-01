@@ -2,7 +2,6 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 from pydantic_ome_ngff.v04 import Axis, MultiscaleMetadata
-from pydantic_ome_ngff.v04.coordinateTransformations import VectorScaleTransform
 from pydantic_ome_ngff.v04.multiscale import Dataset as MultiscaleDataset
 from pydantic_ome_ngff.v04.transform import VectorScale
 
