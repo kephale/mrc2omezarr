@@ -1,9 +1,9 @@
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
-from pydantic_ome_ngff.v04 import Axis, Multiscale
+from pydantic_ome_ngff.v04 import Axis, MultiscaleMetadata
 from pydantic_ome_ngff.v04.coordinateTransformations import VectorScaleTransform
-from pydantic_ome_ngff.v04.multiscales import MultiscaleDataset
+from pydantic_ome_ngff.v04.multiscale import Dataset as MultiscaleDataset
 from skimage.transform import downscale_local_mean, rescale
 
 from mrc2omezarr.header import MrcHeader
@@ -16,7 +16,7 @@ def convert(
     voxel_size: Optional[Union[float, Tuple[float, float, float]]] = None,
     pyramid_method: Union[Literal["local_mean"], Literal["downsample"]] = "local_mean",
 ):
-    meta_pyramid = Multiscale(
+    meta_pyramid = MultiscaleMetadata(
         name="/",
         axes=[
             Axis(name="z", type="space", unit="angstrom"),
@@ -74,7 +74,7 @@ def convert_array(
 
     scale_factors = scale_maps
 
-    meta_pyramid = Multiscale(
+    meta_pyramid = MultiscaleMetadata(
         name="/",
         axes=[
             Axis(name="z", type="space", unit="angstrom"),
