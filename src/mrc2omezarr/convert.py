@@ -5,7 +5,6 @@ from pydantic_ome_ngff.v04 import Axis, MultiscaleMetadata
 from pydantic_ome_ngff.v04.multiscale import Dataset as MultiscaleDataset
 from pydantic_ome_ngff.v04.transform import VectorScale
 
-
 from skimage.transform import downscale_local_mean, rescale
 
 from mrc2omezarr.header import MrcHeader
@@ -18,17 +17,6 @@ def convert(
     voxel_size: Optional[Union[float, Tuple[float, float, float]]] = None,
     pyramid_method: Union[Literal["local_mean"], Literal["downsample"]] = "local_mean",
 ):
-    meta_pyramid = MultiscaleMetadata(
-        name="/",
-        axes=[
-            Axis(name="z", type="space", unit="angstrom"),
-            Axis(name="y", type="space", unit="angstrom"),
-            Axis(name="x", type="space", unit="angstrom"),
-        ],
-        datasets=[],
-        metadata={"source_mrc_header": header.dict()},
-    )
-
     if voxel_size is None:
         voxel_size = header.voxel_size
 
@@ -36,11 +24,12 @@ def convert(
         voxel_size = (voxel_size, voxel_size, voxel_size)
 
     data_pyramid = []
+    meta_datasets = []
 
     for idx, sf in enumerate(scale_factors):
         scale = VectorScale(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
         ms = MultiscaleDataset(path=f"{idx}", coordinateTransformations=[scale])
-        meta_pyramid.datasets.append(ms)
+        meta_datasets.append(ms)
         if pyramid_method == "local_mean":
             data_pyramid.append(downscale_local_mean(data, (sf["z"], sf["y"], sf["x"])))
         elif pyramid_method == "downsample":
@@ -53,6 +42,17 @@ def convert(
                     order=0,
                 ),
             )
+
+    meta_pyramid = MultiscaleMetadata(
+        name="/",
+        axes=[
+            Axis(name="z", type="space", unit="angstrom"),
+            Axis(name="y", type="space", unit="angstrom"),
+            Axis(name="x", type="space", unit="angstrom"),
+        ],
+        datasets=tuple(meta_datasets),
+        metadata={"source_mrc_header": header.dict()},
+    )
 
     return data_pyramid, meta_pyramid
 
@@ -76,26 +76,16 @@ def convert_array(
 
     scale_factors = scale_maps
 
-    meta_pyramid = MultiscaleMetadata(
-        name="/",
-        axes=[
-            Axis(name="z", type="space", unit="angstrom"),
-            Axis(name="y", type="space", unit="angstrom"),
-            Axis(name="x", type="space", unit="angstrom"),
-        ],
-        datasets=[],
-        metadata={},
-    )
-
     if isinstance(voxel_size, float):
         voxel_size = (voxel_size, voxel_size, voxel_size)
 
     data_pyramid = []
+    meta_datasets = []
 
     for idx, sf in enumerate(scale_factors):
         scale = VectorScale(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
         ms = MultiscaleDataset(path=f"{idx}", coordinateTransformations=[scale])
-        meta_pyramid.datasets.append(ms)
+        meta_datasets.append(ms)
         if pyramid_method == "local_mean":
             data_pyramid.append(downscale_local_mean(data, (sf["z"], sf["y"], sf["x"])))
         elif pyramid_method == "downsample":
@@ -108,5 +98,16 @@ def convert_array(
                     order=0,
                 ),
             )
+
+    meta_pyramid = MultiscaleMetadata(
+        name="/",
+        axes=[
+            Axis(name="z", type="space", unit="angstrom"),
+            Axis(name="y", type="space", unit="angstrom"),
+            Axis(name="x", type="space", unit="angstrom"),
+        ],
+        datasets=tuple(meta_datasets),
+        metadata={},
+    )
 
     return data_pyramid, meta_pyramid
