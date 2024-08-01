@@ -4,6 +4,9 @@ import numpy as np
 from pydantic_ome_ngff.v04 import Axis, MultiscaleMetadata
 from pydantic_ome_ngff.v04.coordinateTransformations import VectorScaleTransform
 from pydantic_ome_ngff.v04.multiscale import Dataset as MultiscaleDataset
+from pydantic_ome_ngff.v04.transform import VectorScale
+
+
 from skimage.transform import downscale_local_mean, rescale
 
 from mrc2omezarr.header import MrcHeader
@@ -36,7 +39,7 @@ def convert(
     data_pyramid = []
 
     for idx, sf in enumerate(scale_factors):
-        scale = VectorScaleTransform(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
+        scale = VectorScale(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
         ms = MultiscaleDataset(path=f"{idx}", coordinateTransformations=[scale])
         meta_pyramid.datasets.append(ms)
         if pyramid_method == "local_mean":
@@ -91,7 +94,7 @@ def convert_array(
     data_pyramid = []
 
     for idx, sf in enumerate(scale_factors):
-        scale = VectorScaleTransform(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
+        scale = VectorScale(scale=[sf["z"] * voxel_size[0], sf["y"] * voxel_size[1], sf["x"] * voxel_size[2]])
         ms = MultiscaleDataset(path=f"{idx}", coordinateTransformations=[scale])
         meta_pyramid.datasets.append(ms)
         if pyramid_method == "local_mean":
